@@ -4,10 +4,15 @@
 #include<omp.h>
 #include <mpi.h>
 
+
+//mudar size para 100 para testar tempo
 #define SIZE 3
 
+//descomentar para testar com 100x100
 // int A [SIZE][SIZE] = {{1}};
 // int B[SIZE][SIZE] = {{2}};
+
+//exemplo para testar a logica do programa
 int A [SIZE][SIZE] =   {{1,17,44},
                         {22,53,1},
                         {0,3,100}};
@@ -92,8 +97,6 @@ int main(int argc, char *argv[]){
         for(int i = 0; i< SIZE; i++){
             MPI_Recv(buffer,SIZE,MPI_INT,MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
             memcpy(C[status.MPI_TAG],buffer,sizeof(int)*SIZE);
-            // for(int j = 0; j < SIZE; j++) printf("%d ",resp[status.MPI_TAG][j]);
-            // printf("\n");
 
         }
         // todas linhas recebidas

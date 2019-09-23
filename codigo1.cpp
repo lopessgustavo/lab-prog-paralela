@@ -3,11 +3,20 @@
 #include <time.h>
 #include<omp.h>
 
+//mudar size para 100 para testar tempo
+#define SIZE 3
 
-#define SIZE 1000
+//descomentar para testar com 100x100
+// int A [SIZE][SIZE] = {{1}};
+// int B[SIZE][SIZE] = {{2}};
 
-int A [SIZE][SIZE] = {{1}};
-int B [SIZE][SIZE] = {{1}};
+//exemplo para testar a logica do programa
+int A [SIZE][SIZE] =   {{1,17,44},
+                        {22,53,1},
+                        {0,3,100}};
+int B [SIZE][SIZE] = {{13,0,0},
+                        {32,3,0},
+                        {44,53,2}};
 int C [SIZE][SIZE];
 
 using namespace std;
@@ -59,16 +68,15 @@ int main(){
                 C[i][j] = 0;
                 for(k = 0; k < SIZE; k++){
                     C[i][j] += A[i][k]*B[k][j];
-                    // printf("%d",soma );
                 }
             }
         }
 
     }
+    imprimir(C);
 
     
 
-    // imprimir(C);
 
 
 }
