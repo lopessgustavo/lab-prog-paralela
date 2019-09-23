@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define SIZE 100
+#define SIZE 1000
 
 using namespace std;
 
@@ -12,7 +12,7 @@ int main(){
     for(int i = 0; i<2; i++){
         for(int j = 0; j<SIZE; j++){
             for(int k = 0; k<SIZE; k++){
-                fprintf(fp,"%d ", rand() % 100);
+                fprintf(fp,"%d ", rand() % 10);
             }
         }
     }
