@@ -67,12 +67,13 @@ int main(int argc, char *argv[]){
     MPI_Comm_size(MPI_COMM_WORLD,&np);
     
     int tamanho = SIZE/np;
+    int resto = SIZE % np;
     int vet[SIZE] = {0};
 
     if(rank != 0){
         int i,j,k,soma;
      
-        for(i = rank - 1; i<SIZE; i+=np-1){
+        for(i = (rank-1)*tamanho; i<((rank-1)*tamanho)+tamanho; i+=1){
      
             for( j = 0; j < SIZE; j++){
                 int soma = 0;
@@ -87,6 +88,26 @@ int main(int argc, char *argv[]){
             MPI_Send(&vet,SIZE,MPI_INT,0,i,MPI_COMM_WORLD);
             
         }
+        if(rank == np-1){
+            do{
+     
+                for( j = 0; j < SIZE; j++){
+                    int soma = 0;
+                
+                    for(k = 0; k < SIZE; k++){
+                        soma+= A[i][k]*B[k][j];
+                    }
+                    vet[j] = soma;
+            }
+
+            // enviando linha i 
+            MPI_Send(&vet,SIZE,MPI_INT,0,i,MPI_COMM_WORLD);
+            
+            i++;
+            }while(i<SIZE);
+        }
+        
+        
 
         // todas linhas enviadas
         MPI_Barrier(MPI_COMM_WORLD);
@@ -104,10 +125,6 @@ int main(int argc, char *argv[]){
         imprimir(C);
         printf("\n");
     }
-
-    
     MPI_Finalize();
-    
-
 
 }
