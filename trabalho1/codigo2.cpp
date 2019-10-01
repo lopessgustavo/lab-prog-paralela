@@ -68,7 +68,7 @@ int main(int argc, char *argv[]){
     
     int tamanho = SIZE/np;
     int resto = SIZE % np;
-    int vet[SIZE] = {0};
+    int recvbuff[tamanho][SIZE];
 
     if(rank != 0){
         int i,j,k,soma;
@@ -114,6 +114,9 @@ int main(int argc, char *argv[]){
      
     }
     else{
+
+        MPI_Scatter(A,tamanho,MPI_INT,)
+
         int buffer[SIZE];
         for(int i = 0; i< SIZE; i++){
             MPI_Recv(buffer,SIZE,MPI_INT,MPI_ANY_SOURCE,MPI_ANY_TAG,MPI_COMM_WORLD,&status);
