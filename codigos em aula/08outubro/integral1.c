@@ -1,5 +1,33 @@
 #include <stdio.h>
 #include <mpi.h>
+
+float calcula(float local_a, float local_b,
+	int local_n, float h) {
+	float integral;
+	float x, i;
+	float f(float x); // função a integrar
+	integral = ( f(local_a) + f(local_b) ) /2.0;
+	x = local_a;
+	for( i=1; i<=local_n; i++) {
+		x += h;
+		integral += f(x);
+	}
+	integral *= h;
+	return integral;
+}
+
+float f(float x) {
+
+	float fx; // valor de retorno
+
+	// esta é a função a integrar
+	// exemplo: função quadrática
+	fx = x * x;
+
+	return fx;
+}
+
+
 int main(int argc, char** argv) {
 	int my_rank;
 	int p; // número de processos
@@ -30,17 +58,21 @@ int main(int argc, char** argv) {
 
 	integral = calcula(local_a, local_b, local_n, h);
 
-	if(my_rank == 0) {
-		total = integral;
-		for(source=1; source<p; source++) {
-			MPI_Recv(&integral, 1, MPI_FLOAT, source, tag,
-				MPI_COMM_WORLD, &status);
-			total +=integral;
+    // VERSAO SEM MPI_Reduce
+	// if(my_rank == 0) {
+	// 	total = integral;
+	// 	for(source=1; source<p; source++) {
+	// 		MPI_Recv(&integral, 1, MPI_FLOAT, source, tag,
+	// 			MPI_COMM_WORLD, &status);
+	// 		total +=integral;
 
-		}
-	} else
-	MPI_Send(&integral, 1, MPI_FLOAT, dest,
-		tag, MPI_COMM_WORLD);
+	// 	}
+	// } else
+	// MPI_Send(&integral, 1, MPI_FLOAT, dest,
+	// 	tag, MPI_COMM_WORLD);
+
+    //COM MPI_REDUCE
+    MPI_Reduce(&integral,&total,1,MPI_FLOAT,MPI_SUM,0,MPI_COMM_WORLD);
 
 	if(my_rank == 0) printf("Resultado: %f\n", total);
 	MPI_Finalize();
@@ -48,28 +80,3 @@ int main(int argc, char** argv) {
 }
 
 
-float calcula(float local_a, float local_b,
-	int local_n, float h) {
-	float integral;
-	float x, i;
-	float f(float x); // função a integrar
-	integral = ( f(local_a) + f(local_b) ) /2.0;
-	x = local_a;
-	for( i=1; i<=local_n; i++) {
-		x += h;
-		integral += f(x);
-	}
-	integral *= h;
-	return integral;
-}
-
-float f(float x) {
-
-	float fx; // valor de retorno
-
-	// esta é a função a integrar
-	// exemplo: função quadrática
-	fx = x * x;
-
-	return fx;
-}
