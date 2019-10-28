@@ -1,5 +1,29 @@
 #include <stdio.h>
 #include <mpi.h>
+
+float calcula(float local_a, float local_b,int local_n, float h) {
+    float integral;
+    float x, i;
+    float f(float x);
+    // função a integrar
+    integral = ( f(local_a) + f(local_b) ) /2.0;
+    x = local_a;
+    for( i=1; i<=local_n; i++) {
+        x += h;
+        integral += f(x);
+    }
+    integral *= h;
+    return integral;
+}
+
+float f(float x) {
+    float fx; //valor de retorno
+            // esta é a função a integrar
+    // exemplo: função quadrática
+    fx = x * x;
+    return fx;
+}
+
 int main(int argc, char** argv) {
     int my_rank;
     int p;
@@ -48,25 +72,4 @@ int main(int argc, char** argv) {
 }
 
 
-float calcula(float local_a, float local_b,int local_n, float h) {
-    float integral;
-    float x, i;
-    float f(float x);
-    // função a integrar
-    integral = ( f(local_a) + f(local_b) ) /2.0;
-    x = local_a;
-    for( i=1; i<=local_n; i++) {
-        x += h;
-        integral += f(x);
-    }
-    integral *= h;
-    return integral;
-}
 
-float f(float x) {
-    float fx; //valor de retorno
-            // esta é a função a integrar
-    // exemplo: função quadrática
-    fx = x * x;
-    return fx;
-}
