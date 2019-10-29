@@ -1,17 +1,28 @@
 #include <stdio.h>
 #include <mpi.h>
+#include<omp.h>
 
 float calcula(float local_a, float local_b,int local_n, float h) {
     float integral;
-    float x, i;
+    float x=0;
+    int i;
     float f(float x);
+    int novo_local_n = local_n/4;
     // função a integrar
     integral = ( f(local_a) + f(local_b) ) /2.0;
-    x = local_a;
-    for( i=1; i<=local_n; i++) {
-        x += h;
-        integral += f(x);
+    #pragma omp parallel num_threads(4) private(x)
+    {
+        int threadNum = omp_get_thread_num();
+        x = threadNum*novo_local_n*h;
+        printf("%f\n",x);
+        #pragma omp for private(i) reduction(+:integral)
+        for( i=1; i<=local_n; i++) {
+            // printf("%f\n",x);
+            x += h;
+            integral += f(x);
+        }
     }
+            
     integral *= h;
     return integral;
 }
@@ -58,15 +69,9 @@ int main(int argc, char** argv) {
     local_a =a + my_rank * local_n * h;
     local_b =local_a + local_n * h;
     integral = calcula(local_a, local_b, local_n, h);
-    if(my_rank == 0) {
-        total = integral;
-        for(source=1; source<p; source++) {
-            MPI_Recv(&integral, 1, MPI_FLOAT, source, tag,MPI_COMM_WORLD, &status);
-            total +=integral;
-        }
-    } else{
-    MPI_Send(&integral, 1, MPI_FLOAT, dest,tag, MPI_COMM_WORLD);
-    }
+    
+    MPI_Reduce(&integral,&total,1,MPI_FLOAT,MPI_SUM,0,MPI_COMM_WORLD);
+
     if(my_rank == 0) printf("Resultado: %f\n", total);
     MPI_Finalize();
 }
