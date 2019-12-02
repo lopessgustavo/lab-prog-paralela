@@ -102,6 +102,60 @@ void mergeSort(int arr[], int l, int r)
     } 
 }
 
+void intercalar(int* vet1, int* vet2,int* vet3, int tam1, int tam2){
+    int i = 0, j = 0, k = 0;
+    while(i<tam1 || j<tam2){
+        if(vet1[i]<vet2[j]){
+            vet3[k] = vet1[i];
+            i++;
+            k++;
+        }
+        else{
+            vet3[k] = vet2[j];
+            j++;
+            k++;
+        }
+    }
+    while(i<tam1){
+        vet3[k] = vet1[i];
+        i++;
+        k++;
+    }
+    while(j<tam2){
+        vet3[k] = vet2[j];
+        j++;
+        k++;
+    }
+    return;
+}
+void mergeArrays(int arr1[], int arr2[], int n1, 
+                             int n2, int *arr3) 
+{ 
+    int i = 0, j = 0, k = 0; 
+  
+    // Traverse both array 
+    while (i<n1 && j <n2) 
+    { 
+        // Check if current element of first 
+        // array is smaller than current element 
+        // of second array. If yes, store first 
+        // array element and increment first array 
+        // index. Otherwise do same with second array 
+        if (arr1[i] < arr2[j]) 
+            arr3[k++] = arr1[i++]; 
+        else
+            arr3[k++] = arr2[j++]; 
+    } 
+  
+    // Store remaining elements of first array 
+    while (i < n1) 
+        arr3[k++] = arr1[i++]; 
+  
+    // Store remaining elements of second array 
+    while (j < n2) 
+        arr3[k++] = arr2[j++]; 
+}
+
 void printArray (int arr[], int n) 
 { 
     for (int i = 0; i < n; i++) 
@@ -121,25 +175,24 @@ int main(int argc, char* argv[]){
 
     if(my_rank == 0){
         int vet[1024];
-        for(int i = 0; i<1024; i++) vet[i] = i;
+        for(int i = 1024; i>0; i--) vet[i] = i;
         // randomize(vet,1024);
         for(int i = 1; i<4;i++){
-            int *pos = vet+(256*i);
             MPI_Send(vet+(256*i),256,MPI_INT,i,0,MPI_COMM_WORLD);
         }
 
-        // free(vet);
-        mergeSort(vet,0,255);
-        int aux[256];
         int resp[1024];
-        int i;
-        memcpy(resp,vet,256*sizeof(int));
-        for(i = 1; i < 4; i++){
+        int aux[256];
+        for(int i = 0; i<256; i++) resp[i] = vet[i];
+        mergeSort(resp,0,255);
+
+        for(int i = 1; i<4; i++){
             MPI_Recv(aux,256,MPI_INT,i,0,MPI_COMM_WORLD,&status);
-            memcpy(resp+(256*i),aux,256*(sizeof(int)));
-            merge(resp,0,256*i,256);
+            for(int j = 0; j < 256; j++) resp[256*i+j] = aux[j];
+            merge(resp,0,256*i,256*i+255);
         }
-        printArray(resp,i*256);
+        printArray(resp,1024);
+        // printArray(resp,256*i);
 
     }
     
