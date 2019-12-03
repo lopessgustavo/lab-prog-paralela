@@ -93,6 +93,60 @@ void mergeSort(int arr[], int l, int r)
     } 
 }
 
+void intercalar(int* vet1, int* vet2,int* vet3, int tam1, int tam2){
+    int i = 0, j = 0, k = 0;
+    while(i<tam1 || j<tam2){
+        if(vet1[i]<vet2[j]){
+            vet3[k] = vet1[i];
+            i++;
+            k++;
+        }
+        else{
+            vet3[k] = vet2[j];
+            j++;
+            k++;
+        }
+    }
+    while(i<tam1){
+        vet3[k] = vet1[i];
+        i++;
+        k++;
+    }
+    while(j<tam2){
+        vet3[k] = vet2[j];
+        j++;
+        k++;
+    }
+    return;
+}
+void mergeArrays(int arr1[], int arr2[], int n1, 
+                             int n2, int *arr3) 
+{ 
+    int i = 0, j = 0, k = 0; 
+  
+    // Traverse both array 
+    while (i<n1 && j <n2) 
+    { 
+        // Check if current element of first 
+        // array is smaller than current element 
+        // of second array. If yes, store first 
+        // array element and increment first array 
+        // index. Otherwise do same with second array 
+        if (arr1[i] < arr2[j]) 
+            arr3[k++] = arr1[i++]; 
+        else
+            arr3[k++] = arr2[j++]; 
+    } 
+  
+    // Store remaining elements of first array 
+    while (i < n1) 
+        arr3[k++] = arr1[i++]; 
+  
+    // Store remaining elements of second array 
+    while (j < n2) 
+        arr3[k++] = arr2[j++]; 
+}
+
 void printArray (int arr[], int n) 
 { 
     for (int i = 0; i < n; i++) 
@@ -100,11 +154,14 @@ void printArray (int arr[], int n)
     printf("\n"); 
 }
 
+int cmpfunc (const void * a, const void * b) {
+   return ( *(int*)a - *(int*)b );
+}
+
 int main(int argc, char* argv[]){
     int my_rank;
 	int p; // número de processos
-	int n=1024;
-    int chunk = n/p;
+	int n=1024; // número de trapezóides
 	MPI_Status status;
 
     MPI_Init(&argc, &argv);
@@ -112,39 +169,39 @@ int main(int argc, char* argv[]){
 	MPI_Comm_size(MPI_COMM_WORLD, &p);
 
     if(my_rank == 0){
-        int vet[n];
+        int vet[1024];
         int soma = 0;
-        for(int i = n; i>0; i--) vet[i] = i;
-        shuffle(vet,n);
+        for(int i = 1024; i>0; i--) vet[i] = i;
+        shuffle(vet,1024);
         for(int i = 1; i<4;i++){
-            MPI_Send(vet+(chunk*i),chunk,MPI_INT,i,0,MPI_COMM_WORLD);
+            MPI_Send(vet+(256*i),256,MPI_INT,i,0,MPI_COMM_WORLD);
         }
-        mergeSort(vet,0,chunk-1);
-        int aux[chunk];
+        mergeSort(vet,0,255);
+        int aux[256];
         for(int i = 1; i < 4; i++){
-            MPI_Recv(vet+(chunk*i),chunk,MPI_INT,i,0,MPI_COMM_WORLD,&status);
-            merge(vet,0,(chunk*i)-1,chunk*(i+1)-1);
+            MPI_Recv(vet+(256*i),256,MPI_INT,i,0,MPI_COMM_WORLD,&status);
+            merge(vet,0,(256*i)-1,256*(i+1)-1);
         }
-        // printArray(vet,n);
+        printArray(vet,1024);
     }
     
     if(my_rank == 1){
-        int vet[chunk];
-        MPI_Recv(vet,chunk,MPI_INT,0,0,MPI_COMM_WORLD,&status);
-        mergeSort(vet,0,chunk-1);
-        MPI_Send(vet,chunk,MPI_INT,0,0,MPI_COMM_WORLD);       
+        int vet[256];
+        MPI_Recv(vet,256,MPI_INT,0,0,MPI_COMM_WORLD,&status);
+        mergeSort(vet,0,255);
+        MPI_Send(vet,256,MPI_INT,0,0,MPI_COMM_WORLD);       
     }
     if(my_rank == 2){
-        int vet[chunk];
-        MPI_Recv(vet,chunk,MPI_INT,0,0,MPI_COMM_WORLD,&status);
-        mergeSort(vet,0,chunk-1);
-        MPI_Send(vet,chunk,MPI_INT,0,0,MPI_COMM_WORLD);
+        int vet[256];
+        MPI_Recv(vet,256,MPI_INT,0,0,MPI_COMM_WORLD,&status);
+        mergeSort(vet,0,255);
+        MPI_Send(vet,256,MPI_INT,0,0,MPI_COMM_WORLD);
     }
     if(my_rank == 3){
-        int vet[chunk];
-        MPI_Recv(vet,chunk,MPI_INT,0,0,MPI_COMM_WORLD,&status);
-        mergeSort(vet,0,chunk-1);
-        MPI_Send(vet,chunk,MPI_INT,0,0,MPI_COMM_WORLD);
+        int vet[256];
+        MPI_Recv(vet,256,MPI_INT,0,0,MPI_COMM_WORLD,&status);
+        mergeSort(vet,0,255);
+        MPI_Send(vet,256,MPI_INT,0,0,MPI_COMM_WORLD);
     }
     
 
