@@ -93,69 +93,11 @@ void mergeSort(int arr[], int l, int r)
     } 
 }
 
-void intercalar(int* vet1, int* vet2,int* vet3, int tam1, int tam2){
-    int i = 0, j = 0, k = 0;
-    while(i<tam1 || j<tam2){
-        if(vet1[i]<vet2[j]){
-            vet3[k] = vet1[i];
-            i++;
-            k++;
-        }
-        else{
-            vet3[k] = vet2[j];
-            j++;
-            k++;
-        }
-    }
-    while(i<tam1){
-        vet3[k] = vet1[i];
-        i++;
-        k++;
-    }
-    while(j<tam2){
-        vet3[k] = vet2[j];
-        j++;
-        k++;
-    }
-    return;
-}
-void mergeArrays(int arr1[], int arr2[], int n1, 
-                             int n2, int *arr3) 
-{ 
-    int i = 0, j = 0, k = 0; 
-  
-    // Traverse both array 
-    while (i<n1 && j <n2) 
-    { 
-        // Check if current element of first 
-        // array is smaller than current element 
-        // of second array. If yes, store first 
-        // array element and increment first array 
-        // index. Otherwise do same with second array 
-        if (arr1[i] < arr2[j]) 
-            arr3[k++] = arr1[i++]; 
-        else
-            arr3[k++] = arr2[j++]; 
-    } 
-  
-    // Store remaining elements of first array 
-    while (i < n1) 
-        arr3[k++] = arr1[i++]; 
-  
-    // Store remaining elements of second array 
-    while (j < n2) 
-        arr3[k++] = arr2[j++]; 
-}
-
 void printArray (int arr[], int n) 
 { 
     for (int i = 0; i < n; i++) 
         printf("%d ", arr[i]); 
     printf("\n"); 
-}
-
-int cmpfunc (const void * a, const void * b) {
-   return ( *(int*)a - *(int*)b );
 }
 
 int main(int argc, char* argv[]){
