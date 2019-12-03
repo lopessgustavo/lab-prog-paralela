@@ -114,5 +114,5 @@ int main(){
     for(int i = 0; i<1024; i++) vet[i] = i;
     randomize(vet,1024);
     mergeSort(vet,0,1023);
-    printArray(vet,1024);
+    // printArray(vet,1024);
 }

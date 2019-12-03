@@ -103,7 +103,8 @@ void printArray (int arr[], int n)
 int main(int argc, char* argv[]){
     int my_rank;
 	int p; // número de processos
-	int n=1024; // número de trapezóides
+	int n=1024;
+    int chunk = n/p;
 	MPI_Status status;
 
     MPI_Init(&argc, &argv);
@@ -111,39 +112,39 @@ int main(int argc, char* argv[]){
 	MPI_Comm_size(MPI_COMM_WORLD, &p);
 
     if(my_rank == 0){
-        int vet[1024];
+        int vet[n];
         int soma = 0;
-        for(int i = 1024; i>0; i--) vet[i] = i;
-        shuffle(vet,1024);
+        for(int i = n; i>0; i--) vet[i] = i;
+        shuffle(vet,n);
         for(int i = 1; i<4;i++){
-            MPI_Send(vet+(256*i),256,MPI_INT,i,0,MPI_COMM_WORLD);
+            MPI_Send(vet+(chunk*i),chunk,MPI_INT,i,0,MPI_COMM_WORLD);
         }
-        mergeSort(vet,0,255);
-        int aux[256];
+        mergeSort(vet,0,chunk-1);
+        int aux[chunk];
         for(int i = 1; i < 4; i++){
-            MPI_Recv(vet+(256*i),256,MPI_INT,i,0,MPI_COMM_WORLD,&status);
-            merge(vet,0,(256*i)-1,256*(i+1)-1);
+            MPI_Recv(vet+(chunk*i),chunk,MPI_INT,i,0,MPI_COMM_WORLD,&status);
+            merge(vet,0,(chunk*i)-1,chunk*(i+1)-1);
         }
-        printArray(vet,1024);
+        // printArray(vet,n);
     }
     
     if(my_rank == 1){
-        int vet[256];
-        MPI_Recv(vet,256,MPI_INT,0,0,MPI_COMM_WORLD,&status);
-        mergeSort(vet,0,255);
-        MPI_Send(vet,256,MPI_INT,0,0,MPI_COMM_WORLD);       
+        int vet[chunk];
+        MPI_Recv(vet,chunk,MPI_INT,0,0,MPI_COMM_WORLD,&status);
+        mergeSort(vet,0,chunk-1);
+        MPI_Send(vet,chunk,MPI_INT,0,0,MPI_COMM_WORLD);       
     }
     if(my_rank == 2){
-        int vet[256];
-        MPI_Recv(vet,256,MPI_INT,0,0,MPI_COMM_WORLD,&status);
-        mergeSort(vet,0,255);
-        MPI_Send(vet,256,MPI_INT,0,0,MPI_COMM_WORLD);
+        int vet[chunk];
+        MPI_Recv(vet,chunk,MPI_INT,0,0,MPI_COMM_WORLD,&status);
+        mergeSort(vet,0,chunk-1);
+        MPI_Send(vet,chunk,MPI_INT,0,0,MPI_COMM_WORLD);
     }
     if(my_rank == 3){
-        int vet[256];
-        MPI_Recv(vet,256,MPI_INT,0,0,MPI_COMM_WORLD,&status);
-        mergeSort(vet,0,255);
-        MPI_Send(vet,256,MPI_INT,0,0,MPI_COMM_WORLD);
+        int vet[chunk];
+        MPI_Recv(vet,chunk,MPI_INT,0,0,MPI_COMM_WORLD,&status);
+        mergeSort(vet,0,chunk-1);
+        MPI_Send(vet,chunk,MPI_INT,0,0,MPI_COMM_WORLD);
     }
     
 
