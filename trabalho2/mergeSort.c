@@ -3,29 +3,20 @@
 #include<mpi.h>
 #include<time.h>
 #include<string.h>
-void swap (int *a, int *b) 
-{ 
-    int temp = *a; 
-    *a = *b; 
-    *b = temp; 
-}
 
-void randomize ( int* arr, int n ) 
-{ 
-    // Use a different seed value so that we don't get same 
-    // result each time we run this program 
-    srand ( time(NULL) ); 
-  
-    // Start from the last element and swap one by one. We don't 
-    // need to run for the first element that's why i > 0 
-    for (int i = n-1; i > 0; i--) 
-    { 
-        // Pick a random index from 0 to i 
-        int j = rand() % (i+1); 
-  
-        // Swap arr[i] with the element at random index 
-        swap(&arr[i], &arr[j]); 
-    } 
+void shuffle(int *array, size_t n)
+{
+    if (n > 1) 
+    {
+        size_t i;
+        for (i = 0; i < n - 1; i++) 
+        {
+          size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
+          int t = array[j];
+          array[j] = array[i];
+          array[i] = t;
+        }
+    }
 }
 
 // Merges two subarrays of arr[]. 
@@ -163,6 +154,10 @@ void printArray (int arr[], int n)
     printf("\n"); 
 }
 
+int cmpfunc (const void * a, const void * b) {
+   return ( *(int*)a - *(int*)b );
+}
+
 int main(int argc, char* argv[]){
     int my_rank;
 	int p; // número de processos
@@ -175,25 +170,19 @@ int main(int argc, char* argv[]){
 
     if(my_rank == 0){
         int vet[1024];
+        int soma = 0;
         for(int i = 1024; i>0; i--) vet[i] = i;
-        // randomize(vet,1024);
+        shuffle(vet,1024);
         for(int i = 1; i<4;i++){
             MPI_Send(vet+(256*i),256,MPI_INT,i,0,MPI_COMM_WORLD);
         }
-
-        int resp[1024];
+        mergeSort(vet,0,255);
         int aux[256];
-        for(int i = 0; i<256; i++) resp[i] = vet[i];
-        mergeSort(resp,0,255);
-
-        for(int i = 1; i<4; i++){
-            MPI_Recv(aux,256,MPI_INT,i,0,MPI_COMM_WORLD,&status);
-            for(int j = 0; j < 256; j++) resp[256*i+j] = aux[j];
-            merge(resp,0,256*i,256*i+255);
+        for(int i = 1; i < 4; i++){
+            MPI_Recv(vet+(256*i),256,MPI_INT,i,0,MPI_COMM_WORLD,&status);
+            merge(vet,0,(256*i)-1,256*(i+1)-1);
         }
-        printArray(resp,1024);
-        // printArray(resp,256*i);
-
+        printArray(vet,1024);
     }
     
     if(my_rank == 1){
